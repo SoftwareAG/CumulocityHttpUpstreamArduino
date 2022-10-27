@@ -18,7 +18,7 @@ int status = WL_IDLE_STATUS;
 char* deviceName ="ArduinoDevice";
 char* URL = "yourtenantname.cumulocity.com";
 
-char* username = "yourtenantname";
+char* username = "username2logging";
 char* password = "yourpassword";
 
 
