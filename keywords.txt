@@ -1,0 +1,19 @@
+#######################################
+# Syntax Coloring Map For HttpUpstream
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+HttpUpstreamClient KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+registerDevice	KEYWORD2
+sendMeasurement	KEYWORD2
+sendAlarm	KEYWORD2
+sendEvent	KEYWORD2
+
+
