@@ -8,8 +8,8 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 
 
-WiFiSSLClient nwc;
-HttpUpstreamClient clienttest(nwc);
+WiFiSSLClient nwc; //initiate WiFiSSL client 
+HttpUpstreamClient c8yclient(nwc); // initiate HttpUpstreamClient 
 
 
 int status = WL_IDLE_STATUS;
@@ -65,11 +65,12 @@ void setup() {
   Serial.println("Connected to WiFi");  
   timeClient.begin();
  
-  clienttest.registerDevice(deviceName,URL,username,password);
+  c8yclient.registerDevice(deviceName,URL,username,password);
   
 }
 
 void loop() {
+  
   // put your main code here, to run repeatedly:
   // from the server, read them and print them: 
    while (nwc.available()) {
@@ -79,6 +80,18 @@ void loop() {
    
 timeClient.update();
 
-clienttest.sendMeasurement(random(30),unit,timeClient.getFormattedDate(),measurement_type,measurement_object,object,URL);
+//Sending a virtual measurement using a random value
+c8yclient.sendMeasurement(random(30),unit,timeClient.getFormattedDate(),measurement_type,measurement_object,object,URL); //Sening realtime measurement
+
+//Sedning an alarm and an event based on a random value
+if(random(30) > 15){
+
+c8yclient.sendAlarm(alarm_Type, alarm_Text, severity, timeClient.getFormattedDate(),URL ); //Sening realtime alarm
+c8yclient.sendEvent(event_Type, event_Text, timeClient.getFormattedDate(),URL); //Sending realtime event
+
+
+}
+
+
 
 }

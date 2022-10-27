@@ -7,6 +7,7 @@ HttpUpstreamClient::HttpUpstreamClient(Client& networkClient){
 
   }
 
+
 //Base64 encoder
 void HttpUpstreamClient::base64(char* username, char* password){
   char temp[100];
@@ -48,7 +49,7 @@ void HttpUpstreamClient::registerDevice(char* deviceName, char* URL, char* usern
  body["c8y_IsDevice"]="{}";
  //serializeJsonPretty(body, Serial);  
  serializeJsonPretty(body, body2send);
- Serial.println(body2send); 
+ //Serial.println(body2send); //comment this line out for debugging
 
  //HTTP header
 if(_networkClient->connect(URL,443)){
@@ -115,7 +116,7 @@ if(_networkClient->connect(URL,443)){
     
     String body2send= "";
     serializeJsonPretty(root, body2send);
-    Serial.println(body2send);  
+    //Serial.println(body2send);  //comment this line out for debugging
       
     if(_deviceID.length()!=0){
     
@@ -139,47 +140,8 @@ if(_networkClient->connect(URL,443)){
   }
 
 
-    void HttpUpstreamClient::sendMeasurementDeviceID(char* deviceID, int value, char* unit, String timestamp,char* c8y_measurementType,char* c8y_measurementObjectName,char* Name,char* URL){
-
-    Serial.print("The measurement is sent to the device: ");
-    Serial.println(deviceID);
-
-    StaticJsonDocument<250> root;
-    JsonObject source  = root.createNestedObject("source");
- 
-    JsonObject c8y_Measureobject  = root.createNestedObject(c8y_measurementObjectName);
-    JsonObject ObjectName = c8y_Measureobject.createNestedObject(Name);
     
-    source["id"] = deviceID;
-    root["time"] = timestamp;
-    root["type"] = c8y_measurementType;
-    ObjectName["unit"] = unit;
-    ObjectName["value"] = value;
-    
-    String body2send= "";
-    serializeJsonPretty(root, body2send);
-    Serial.println(body2send);  
-      
-    if(_networkClient->connect(URL,443)){
-    Serial.println("Connected to server");
-    
-    _networkClient->println("POST /measurement/measurements HTTP/1.1");  
-    _networkClient->print("Host: ");
-    _networkClient->println(URL);
-    _networkClient->print("Authorization: Basic ");
-    _networkClient->println(_base64);
-    _networkClient->println("Content-Type: application/json");
-    _networkClient->print("Content-Length: ");
-    _networkClient->println(body2send.length());
-    _networkClient->println("Accept: application/json");
-    _networkClient->println();
-    _networkClient->println(body2send);
-     }                                                
-        
-      }
-
-      
-    void HttpUpstreamClient::sendAlarm(char* alarm_Type, char* alarm_Text, char* severity,String timestamp, char* URL){
+  void HttpUpstreamClient::sendAlarm(char* alarm_Type, char* alarm_Text, char* severity,String timestamp, char* URL){
     
     Serial.print("The alarm is sent to the device: ");
     Serial.println(_deviceID);
@@ -194,7 +156,7 @@ if(_networkClient->connect(URL,443)){
     
     String body2send= "";
     serializeJsonPretty(root, body2send);
-    Serial.println(body2send);  
+    //Serial.println(body2send); //comment this line out for debugging  
       
     if(_deviceID.length()!=0){
     
@@ -218,43 +180,7 @@ if(_networkClient->connect(URL,443)){
   }
 
 
-    void HttpUpstreamClient::sendAlarmDeviceID(char* deviceID,char* alarm_Type, char* alarm_Text, char* severity,String timestamp, char* URL){
-    
-    Serial.print("The alarm is sent to the device: ");
-    Serial.println(deviceID);
-
-    StaticJsonDocument<150> root;
-    JsonObject source  = root.createNestedObject("source");
-    source["id"] = deviceID;
-    root["time"] = timestamp;
-    root["text"] = alarm_Text;
-    root["type"] = alarm_Type;
-    root["severity"] = severity;
-    
-    String body2send= "";
-    serializeJsonPretty(root, body2send);
-    Serial.println(body2send);  
-      
-    if(_networkClient->connect(URL,443)){
-    Serial.println("Connected to server");
-    
-    _networkClient->println("POST /alarm/alarms HTTP/1.1");  
-    _networkClient->print("Host: ");
-    _networkClient->println(URL);
-    _networkClient->print("Authorization: Basic ");
-    _networkClient->println(_base64);
-    _networkClient->println("Content-Type: application/json");
-    _networkClient->print("Content-Length: ");
-    _networkClient->println(body2send.length());
-    _networkClient->println("Accept: application/json");
-    _networkClient->println();
-    _networkClient->println(body2send);
-    }                                                
-        
-        
-  }
-
-   void HttpUpstreamClient::sendEvent(char* event_Type, char* event_Text, String timestamp, char* URL){
+  void HttpUpstreamClient::sendEvent(char* event_Type, char* event_Text, String timestamp, char* URL){
     
     Serial.print("The event is sent to the device: ");
     Serial.println(_deviceID);
@@ -269,7 +195,7 @@ if(_networkClient->connect(URL,443)){
     
     String body2send= "";
     serializeJsonPretty(root, body2send);
-    Serial.println(body2send);  
+    //Serial.println(body2send);  //comment this line out for debugging
       
     if(_deviceID.length()!=0){
     
