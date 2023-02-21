@@ -4,42 +4,39 @@
 
 #include "Arduino.h"
 #include <Client.h>
-#include <Base64.h> 
+#include <Base64.h>
 #include <ArduinoJson.h>
 #include <string.h>
 
-class HttpUpstreamClient{
+class HttpUpstreamClient
+{
 
-  private:
-  
-  char* _clientId;
-  char* _host;
-  char* _base64;
+private:
+  char *_clientId;
+  char *_host;
+  char *_credentials;
   String _deviceID;
-  
-  void base64(char* username, char* password);
 
-  //void obtaindeviceID(String msg);
-  
-  public:
+  void storeCredentials(char *username, char *password);
 
-  Client* _networkClient;
-  
-  
-  HttpUpstreamClient(Client& networkClient);
+  // void obtaindeviceID(String msg);
 
-  //create device with a unique device name  
-  void registerDevice(char* deviceName, char* URL, char* username, char* password);
+public:
+  Client *_networkClient;
 
-  //send a single measurement to the cloud without knowing the device ID 
-  void sendMeasurement(int value, char* unit, String timestamp,char* measurementType,char* measurementObjectName,char* Name,char* URL);
+  HttpUpstreamClient(Client &networkClient);
 
-  //send an alarm to the cloud without knowing the device ID 
-  void sendAlarm(char* alarm_Type, char* alarm_Text, char* severity,String timestamp, char* URL);
+  // create device with a unique device name
+  void registerDevice(char *deviceName, char *URL, char *username, char *password);
 
-  //send a event to the cloud without knowing the device ID 
-  void sendEvent(char* event_Type, char* event_Text, String timestamp, char* URL);
-  
-  };
+  // send a single measurement to the cloud without knowing the device ID
+  void sendMeasurement(int value, char *unit, String timestamp, char *measurementType, char *measurementObjectName, char *Name, char *URL);
+
+  // send an alarm to the cloud without knowing the device ID
+  void sendAlarm(char *alarm_Type, char *alarm_Text, char *severity, String timestamp, char *URL);
+
+  // send a event to the cloud without knowing the device ID
+  void sendEvent(char *event_Type, char *event_Text, String timestamp, char *URL);
+};
 
 #endif
