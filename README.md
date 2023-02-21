@@ -1,4 +1,5 @@
-# ur-ArduinoMicrocontroller-library
+# IoTEP Arduino Upstream Library
+
 
 A library created by Yingzhe and Luis from University Relation, Software AG
 
@@ -53,5 +54,12 @@ void sendEvent(char* event_Type, char* event_Text, String timestamp, char* URL);
 - `String timestamp` Timestamp where the measurement is created
 - `char* URL` The URL where your tenant is. The format is: *MyTenant.cumulocity.com* 
 
+todo: old above
 
+## Documentation
 
+Documentation is available online [here](todo).
+
+If you want to download the documentation, you can grab the _pages/docs/html_ folder.
+
+For regenerating documentation from source, install and run `doxygen`

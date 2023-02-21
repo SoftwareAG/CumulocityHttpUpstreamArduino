@@ -1,6 +1,25 @@
 #include "HttpUpstream.h"
 #include <WiFi.h>
 
+/**
+ * \mainpage
+ * 
+ * \section Introduction
+ * 
+ * This is a library for uploading data from an Arduino micro controller to Cumulocity. This was developed for the [IoT Education Package (IoTEP)](https://education.softwareag.com/internet-of-things).
+ * 
+ * \section Installation
+ * 
+ * This library is on the Arduino Library Manager list.
+ * You can install it in the Arduino IDE at Tools -> Manage Libraries... Search for and install _Cumulocity IoT Upstreaming_.
+ * 
+ * \section Limitations
+ * 
+ * In its current state this library does only offer a limited set of capabilities, which are important for IoTEP tutorials.
+ * 
+ * Currently this library does not follow security best practices. Instead of using device specific credentials, it uses user credentials.
+ */
+
 // Implementations notes
 //
 // We use C string formatting for constructing JSON bodies instead of something like
@@ -15,6 +34,15 @@ HttpUpstreamClient::HttpUpstreamClient(Client &networkClient)
 }
 
 // Base64 encoder
+/**
+ * \brief Stores credentials for Basic Auth
+ * 
+ * Stores username and password in Base64 encoded format.
+ * Stored credentials will be used for authentication in other methods.
+ * 
+ * @param username 
+ * @param password 
+ */
 void HttpUpstreamClient::storeCredentials(char *username, char *password)
 {
   char temp[strlen(username) +
@@ -50,6 +78,16 @@ void HttpUpstreamClient::storeCredentials(char *username, char *password)
 }
 
 // Register device on the cloud and obtain the device id
+/**
+ * @brief Registers the device with Cumulocity.
+ * 
+ * For registering the device, you must supply credentials of a user with rights to create devices on the specified tenant.
+ * 
+ * @param deviceName
+ * @param URL Cumulocity tenant domain name, e.g. iotep.cumulocity.com
+ * @param username
+ * @param password 
+ */
 void HttpUpstreamClient::registerDevice(char *deviceName, char *URL, char *username, char *password)
 {
   Serial.println("Preparing to register device.");
@@ -115,7 +153,21 @@ void HttpUpstreamClient::registerDevice(char *deviceName, char *URL, char *usern
 
 // Measurement Type: c8y_Typemeasuremnt
 // Measuremnt Name: c8y_measurmentname
-void HttpUpstreamClient::sendMeasurement(int value, char *unit, String timestamp, char *c8y_measurementType, char *c8y_measurementObjectName, char *Name, char *host)
+/**
+ * @brief Sends a measurement.
+ * 
+ * @param value 
+ * @param unit The unit of the measurement, such as "Wh" or "C".
+ * @param timestamp Time of the measurement. 
+ * @param c8y_measurementType The most specific type of this entire measurement.
+ * @param c8y_measurementObjectName 
+ * @param Name 
+ * @param host 
+ */
+// todo: unit should be optional
+// todo: What about floating point values? c8y doc mentions both 64 bit floats and 64 bit signed integers.
+// todo: Name arguments consistently with c8y
+void HttpUpstreamClient::sendMeasurement(int value, char *unit, String timestamp, char *type, char *c8y_measurementObjectName, char *Name, char *host)
 {
   Serial.print("Preparing to send measurement with device ID: ");
   Serial.println(_deviceID);
@@ -127,11 +179,11 @@ void HttpUpstreamClient::sendMeasurement(int value, char *unit, String timestamp
       String(value).length() +
       _deviceID.length() +
       timestamp.length() +
-      strlen(c8y_measurementType) +
+      strlen(type) +
       69 + // length of template string without placeholders
       1;   // string terminator
   char body2send[contentLength];
-  snprintf_P(body2send, contentLength, PSTR("{\"%s\":{\"%s\":{\"unit\":\"%s\",\"value\":%i}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\",\"type\":\"%s\"}"), Name, c8y_measurementObjectName, unit, value, _deviceID.c_str(), timestamp.c_str(), c8y_measurementType);
+  snprintf_P(body2send, contentLength, PSTR("{\"%s\":{\"%s\":{\"unit\":\"%s\",\"value\":%i}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\",\"type\":\"%s\"}"), Name, c8y_measurementObjectName, unit, value, _deviceID.c_str(), timestamp.c_str(), type);
 
   if (_deviceID.length() != 0)
   {
