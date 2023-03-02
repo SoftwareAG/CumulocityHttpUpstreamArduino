@@ -14,10 +14,12 @@ class HttpUpstreamClient
 private:
   char *_clientId;
   char *_host;
-  char *_credentials;
+  char *_deviceCredentials;
   String _deviceID;
 
-  void storeCredentials(char *username, char *password);
+  int storeDeviceCredentialsAndHost(char* host, const char *tenantId, const char *username, const char *password);
+  int loadDeviceCredentialsAndHostFromEEPROM();
+  int requestDeviceCredentialsFromTenant(char *host);
 
   // void obtaindeviceID(String msg);
 
@@ -27,16 +29,20 @@ public:
   HttpUpstreamClient(Client &networkClient);
 
   // create device with a unique device name
-  void registerDevice(char *deviceName, char *URL, char *username, char *password);
+  int registerDevice(char *host, char *deviceName);
+  int registerDevice(char *host, char *deviceName, char *supportedOperations[]);
+
+  void removeDevice();
+  void removeDevice(bool forceClearEEPROM);
 
   // send a single measurement to the cloud without knowing the device ID
-  void sendMeasurement(int value, char *unit, String timestamp, char *measurementType, char *measurementObjectName, char *Name, char *URL);
+  void sendMeasurement(int value, char *unit, String timestamp, char *measurementType, char *measurementObjectName, char *Name);
 
   // send an alarm to the cloud without knowing the device ID
-  void sendAlarm(char *alarm_Type, char *alarm_Text, char *severity, String timestamp, char *URL);
+  void sendAlarm(char *alarm_Type, char *alarm_Text, char *severity, String timestamp);
 
   // send a event to the cloud without knowing the device ID
-  void sendEvent(char *event_Type, char *event_Text, String timestamp, char *URL);
+  void sendEvent(char *event_Type, char *event_Text, String timestamp);
 };
 
 #endif
