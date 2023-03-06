@@ -62,6 +62,8 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
   strcat(deviceCredentials, username);
   strcat(deviceCredentials, ":");
   strcat(deviceCredentials, password);
+  Serial.print("Should store deviceCredentials: ");
+  Serial.println(deviceCredentials);
 
 #if defined(ARDUINO_ARCH_ESP32)
   String encodedString = base64::encode(deviceCredentials);
@@ -271,8 +273,16 @@ void HttpUpstreamClient::removeDevice(bool forceClearEEPROM)
  */
 int HttpUpstreamClient::requestDeviceCredentialsFromTenant(char *host)
 {
+#if defined(ARDUINO_ARCH_ESP32)
   String id = String(WiFi.macAddress());
   id.replace(":", "_");
+#else
+  byte mac[6];
+  WiFi.macAddress(mac);
+  char id_c_str[18];
+  snprintf_P(id_c_str, 18, PSTR("%02X_%02X_%02X_%02X_%02X_%02X"), mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  String id = String(id_c_str);
+#endif
   int contentLength =
       id.length() +
       9 + // length of template string without placeholders
