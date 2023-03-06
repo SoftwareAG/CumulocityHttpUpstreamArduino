@@ -35,9 +35,6 @@
 HttpUpstreamClient::HttpUpstreamClient(Client &networkClient)
 {
   _networkClient = &networkClient;
-#if defined(ARDUINO_ARCH_ESP32)
-  EEPROM.begin(512);
-#endif
 }
 
 // Base64 encoder
@@ -102,10 +99,11 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
   Serial.println("---------------------");
   // todo: end remove
 
-  uint32_t hostLength = strlen(_host);
-  uint32_t deviceCredentialsLength = strlen(_deviceCredentials);
+  // todo: check whether uint16_t works as well, that would save 4 bytes EEPROM total, maybe even uint8_t, because credentials and URL should be <= 255 characters?
+  uint32_t hostLength = strlen(_host) + 1;
+  uint32_t deviceCredentialsLength = strlen(_deviceCredentials) + 1;
 
-  if (hostLength + deviceCredentialsLength + 8 > 512)
+  if (hostLength > 512 || deviceCredentialsLength > 512 || hostLength + deviceCredentialsLength + 8 > 512)
   {
     Serial.println("Combination of host and device credentials too long for EEPROM.");
     Serial.println("Host and device credentials will not be persisted.");
@@ -115,12 +113,20 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
   Serial.print("hostLength: ");
   Serial.println(hostLength);
   EEPROM.put(0, hostLength);
-  EEPROM.put(8, _host);
+  for (int i = 0; i < hostLength; i++)
+  {
+    EEPROM.write(8 + i, _host[i]);
+  }
 
   Serial.print("deviceCredentialsLength: ");
   Serial.println(deviceCredentialsLength);
   EEPROM.put(4, deviceCredentialsLength);
-  EEPROM.put(8 + hostLength, _deviceCredentials);
+  for (int i = 0; i < deviceCredentialsLength; i++)
+  {
+    EEPROM.write(8 + hostLength + i, _deviceCredentials[i]);
+  }
+  Serial.print("8 + hostLength: ");
+  Serial.println(8 + hostLength);
 
 #if defined(ARDUINO_ARCH_ESP32)
   Serial.println("Committing to EEPROM.");
@@ -148,18 +154,40 @@ int HttpUpstreamClient::loadDeviceCredentialsAndHostFromEEPROM()
   EEPROM.get(0, hostLength);
   uint32_t deviceCredentialsLength;
   EEPROM.get(4, deviceCredentialsLength);
-  if (hostLength + deviceCredentialsLength + 8 > 512)
+
+  Serial.print("hostLength: ");
+  Serial.println(hostLength);
+  Serial.print("deviceCredentialsLength: ");
+  Serial.println(deviceCredentialsLength);
+
+  // If one of hostLength or deviceCredentialsLength is near 2^32 - 1, an overflow would be possible.
+  // This should only occur in the case where EEPROM is in cleared state,
+  // because EEPROM size is too small for hostLength or deviceCredentialsLength to be big.
+  // as host and deviceCredentials must fit into EEPROM.
+  if (hostLength > 512 || deviceCredentialsLength > 512 || hostLength + deviceCredentialsLength + 8 > 512)
   {
     return 1;
   }
 
   // Get host from EEPROM
+  if (_host)
+    free(_host);
   _host = (char *)malloc(sizeof(char) * hostLength);
-  EEPROM.get(8, _host);
+  for (int i = 0; i < hostLength; i++)
+  {
+    _host[i] = EEPROM.read(8 + i);
+  }
 
   // Get device credentials from EEPROM
+  if (_deviceCredentials)
+    free(_deviceCredentials);
   _deviceCredentials = (char *)malloc(sizeof(char) * deviceCredentialsLength);
-  EEPROM.get(8 + hostLength, _deviceCredentials);
+  for (int i = 0; i < deviceCredentialsLength; i++)
+  {
+    _deviceCredentials[i] = EEPROM.read(8 + hostLength + i);
+  }
+  Serial.print("8 + hostLength: ");
+  Serial.println(8 + hostLength);
 
   if (hostLength > 0 && deviceCredentialsLength > 0)
   {
@@ -171,7 +199,7 @@ int HttpUpstreamClient::loadDeviceCredentialsAndHostFromEEPROM()
     // todo: start remove
     Serial.println("---------------------");
     Serial.println("Loaded from EEPROM...");
-    Serial.print("host: ");
+    Serial.print("_host: ");
     Serial.println(_host);
     Serial.print("_deviceCredentials: ");
     Serial.println(_deviceCredentials);
@@ -182,7 +210,7 @@ int HttpUpstreamClient::loadDeviceCredentialsAndHostFromEEPROM()
     return 0;
   }
   // Could not get host and device credentials from EEPROM
-  return 1;
+  return 2;
 }
 
 /**
@@ -347,6 +375,10 @@ int HttpUpstreamClient::registerDevice(char *host, char *deviceName)
  */
 int HttpUpstreamClient::registerDevice(char *host, char *deviceName, char *supportedOperations[])
 {
+#if defined(ARDUINO_ARCH_ESP32)
+  Serial.println("EEPROM.begin(512)");
+  Serial.println(EEPROM.begin(512));
+#endif
   Serial.println("Preparing to register device.");
 
   int status = loadDeviceCredentialsAndHostFromEEPROM();
@@ -490,7 +522,7 @@ void HttpUpstreamClient::sendMeasurement(int value, char *unit, String timestamp
 
 void HttpUpstreamClient::sendAlarm(char *alarm_Type, char *alarm_Text, char *severity, String timestamp)
 {
-  Serial.print("Preparing to send alarm device with ID: ");
+  Serial.print("Preparing to send alarm with device ID: ");
   Serial.println(_deviceID);
 
   int contentLength =
@@ -530,7 +562,7 @@ void HttpUpstreamClient::sendAlarm(char *alarm_Type, char *alarm_Text, char *sev
 
 void HttpUpstreamClient::sendEvent(char *event_Type, char *event_Text, String timestamp)
 {
-  Serial.print("Preparing to send event device with ID: ");
+  Serial.print("Preparing to send event with device ID: ");
   Serial.println(_deviceID);
 
   int contentLength =
