@@ -15,11 +15,14 @@ private:
   char *_clientId;
   char *_host;
   char *_deviceCredentials;
-  String _deviceID;
+  char * _deviceID;
 
   int storeDeviceCredentialsAndHost(char* host, const char *tenantId, const char *username, const char *password);
+  int storeDeviceID();
   int loadDeviceCredentialsAndHostFromEEPROM();
   int requestDeviceCredentialsFromTenant(char *host);
+  int loadDeviceIDFromEEPROM();
+  int registerDeviceWithTenant(char *deviceName);
 
   // void obtaindeviceID(String msg);
 

@@ -37,7 +37,6 @@ HttpUpstreamClient::HttpUpstreamClient(Client &networkClient)
   _networkClient = &networkClient;
 }
 
-// Base64 encoder
 /**
  * \brief Stores device credentials for further authentication
  *
@@ -62,8 +61,6 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
   strcat(deviceCredentials, username);
   strcat(deviceCredentials, ":");
   strcat(deviceCredentials, password);
-  Serial.print("Should store deviceCredentials: ");
-  Serial.println(deviceCredentials);
 
 #if defined(ARDUINO_ARCH_ESP32)
   String encodedString = base64::encode(deviceCredentials);
@@ -102,33 +99,27 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
   // todo: end remove
 
   // todo: check whether uint16_t works as well, that would save 4 bytes EEPROM total, maybe even uint8_t, because credentials and URL should be <= 255 characters?
-  uint32_t hostLength = strlen(_host) + 1;
-  uint32_t deviceCredentialsLength = strlen(_deviceCredentials) + 1;
+  uint16_t hostLength = strlen(_host) + 1;
+  uint16_t deviceCredentialsLength = strlen(_deviceCredentials) + 1;
 
-  if (hostLength > 512 || deviceCredentialsLength > 512 || hostLength + deviceCredentialsLength + 8 > 512)
+  if (hostLength > 254 || deviceCredentialsLength > 254 || hostLength + deviceCredentialsLength + 3 > 512)
   {
     Serial.println("Combination of host and device credentials too long for EEPROM.");
     Serial.println("Host and device credentials will not be persisted.");
     return 1;
   }
 
-  Serial.print("hostLength: ");
-  Serial.println(hostLength);
-  EEPROM.put(0, hostLength);
+  EEPROM.write(0, (uint8_t)hostLength);
   for (int i = 0; i < hostLength; i++)
   {
-    EEPROM.write(8 + i, _host[i]);
+    EEPROM.write(3 + i, _host[i]);
   }
 
-  Serial.print("deviceCredentialsLength: ");
-  Serial.println(deviceCredentialsLength);
-  EEPROM.put(4, deviceCredentialsLength);
+  EEPROM.write(1, (uint8_t)deviceCredentialsLength);
   for (int i = 0; i < deviceCredentialsLength; i++)
   {
-    EEPROM.write(8 + hostLength + i, _deviceCredentials[i]);
+    EEPROM.write(3 + hostLength + i, _deviceCredentials[i]);
   }
-  Serial.print("8 + hostLength: ");
-  Serial.println(8 + hostLength);
 
 #if defined(ARDUINO_ARCH_ESP32)
   Serial.println("Committing to EEPROM.");
@@ -137,6 +128,43 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
   return 0;
 }
 
+int HttpUpstreamClient::storeDeviceID()
+{
+  uint16_t hostLength = strlen(_host) + 1;
+  uint16_t deviceCredentialsLength = strlen(_deviceCredentials) + 1;
+  uint16_t deviceIDLength = strlen(_deviceID) + 1;
+
+  // todo: start remove
+  Serial.println("---------------------");
+  Serial.println("Storing into EEPROM...");
+  Serial.print("_deviceID: ");
+  Serial.println(_deviceID);
+  Serial.println("---------------------");
+  // todo: end remove = strlen(_deviceID) + 1;
+
+  if (hostLength > 254 || deviceCredentialsLength > 254 || deviceIDLength > 254 || hostLength + deviceCredentialsLength + deviceIDLength + 3 > 512)
+  {
+    Serial.println("Combination of host, device credentials and device ID too long for EEPROM.");
+    Serial.println("Device ID will not be persisted.");
+    return 2;
+  }
+
+  for (int i = 0; i < 3 + hostLength + deviceCredentialsLength; i++)
+  {
+    EEPROM.write(i, EEPROM.read(i));
+  }
+  EEPROM.write(2, (uint8_t)deviceIDLength);
+  for (int i = 0; i < deviceIDLength; i++)
+  {
+    EEPROM.write(3 + hostLength + deviceCredentialsLength + i, _deviceID[i]);
+  }
+
+#if defined(ARDUINO_ARCH_ESP32)
+  Serial.println("Committing to EEPROM.");
+  EEPROM.commit();
+#endif
+  return 0;
+}
 /**
  * @brief Loads device credentials and host from EEPROM and puts it into corresponding private vars.
  *
@@ -148,25 +176,19 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
  */
 int HttpUpstreamClient::loadDeviceCredentialsAndHostFromEEPROM()
 {
-  // * 4 bytes for credentials length
+  // * 1 byte for host length
+  // * 1 byte for device credentials length
+  // * 1 byte for device id length
   // * host string
-  // * credentials string
+  // * device credentials string
+  // * device id string
 
-  uint32_t hostLength;
+  uint8_t hostLength;
   EEPROM.get(0, hostLength);
-  uint32_t deviceCredentialsLength;
-  EEPROM.get(4, deviceCredentialsLength);
+  uint8_t deviceCredentialsLength;
+  EEPROM.get(1, deviceCredentialsLength);
 
-  Serial.print("hostLength: ");
-  Serial.println(hostLength);
-  Serial.print("deviceCredentialsLength: ");
-  Serial.println(deviceCredentialsLength);
-
-  // If one of hostLength or deviceCredentialsLength is near 2^32 - 1, an overflow would be possible.
-  // This should only occur in the case where EEPROM is in cleared state,
-  // because EEPROM size is too small for hostLength or deviceCredentialsLength to be big.
-  // as host and deviceCredentials must fit into EEPROM.
-  if (hostLength > 512 || deviceCredentialsLength > 512 || hostLength + deviceCredentialsLength + 8 > 512)
+  if (hostLength == 255 || deviceCredentialsLength == 255 || (uint16_t)hostLength + (uint16_t)deviceCredentialsLength + 3 > 512)
   {
     return 1;
   }
@@ -177,7 +199,7 @@ int HttpUpstreamClient::loadDeviceCredentialsAndHostFromEEPROM()
   _host = (char *)malloc(sizeof(char) * hostLength);
   for (int i = 0; i < hostLength; i++)
   {
-    _host[i] = EEPROM.read(8 + i);
+    _host[i] = EEPROM.read(3 + i);
   }
 
   // Get device credentials from EEPROM
@@ -186,10 +208,8 @@ int HttpUpstreamClient::loadDeviceCredentialsAndHostFromEEPROM()
   _deviceCredentials = (char *)malloc(sizeof(char) * deviceCredentialsLength);
   for (int i = 0; i < deviceCredentialsLength; i++)
   {
-    _deviceCredentials[i] = EEPROM.read(8 + hostLength + i);
+    _deviceCredentials[i] = EEPROM.read(3 + hostLength + i);
   }
-  Serial.print("8 + hostLength: ");
-  Serial.println(8 + hostLength);
 
   if (hostLength > 0 && deviceCredentialsLength > 0)
   {
@@ -354,6 +374,89 @@ int HttpUpstreamClient::requestDeviceCredentialsFromTenant(char *host)
   }
 }
 
+int HttpUpstreamClient::loadDeviceIDFromEEPROM()
+{
+  Serial.println("Loading device ID from EEPROM...");
+  uint8_t IDLength;
+  EEPROM.get(2, IDLength);
+  Serial.print("IDLength is ");
+  Serial.println(IDLength);
+
+  if (IDLength == 255 || 3 + strlen(_host) + 1 + strlen(_deviceCredentials) + 1 + (uint16_t)IDLength > 512)
+  {
+    return 1;
+  }
+
+  // Get device ID from EEPROM
+  if (_deviceID)
+    free(_deviceID);
+  _deviceID = (char *)malloc(sizeof(char) * IDLength);
+  for (int i = 0; i < IDLength; i++)
+  {
+    _deviceID[i] = EEPROM.read(3 + strlen(_host) + 1 + strlen(_deviceCredentials) + 1 + i);
+  }
+  Serial.print("_deviceID: ");
+  Serial.println(_deviceID);
+  return 0;
+}
+
+int HttpUpstreamClient::registerDeviceWithTenant(char *deviceName)
+{
+  // JSON Body
+  DynamicJsonDocument body(
+      JSON_OBJECT_SIZE(2) +
+      strlen(deviceName) + 1 +
+      2);
+  String body2send = "";
+  body["name"] = deviceName;
+  body["c8y_IsDevice"] = "{}";
+  serializeJson(body, body2send);
+
+  // HTTP header
+  if (_networkClient->connected())
+    _networkClient->stop();
+  if (_networkClient->connect(_host, 443))
+  {
+    Serial.println("Registering device...");
+    _networkClient->println("POST /inventory/managedObjects/ HTTP/1.1");
+    _networkClient->print("Host: ");
+    _networkClient->println(_host);
+    _networkClient->print("Authorization: Basic ");
+    _networkClient->println(_deviceCredentials);
+    _networkClient->println("Content-Type: application/json");
+    _networkClient->print("Content-Length: ");
+    _networkClient->println(body2send.length());
+    _networkClient->println("Accept: application/json");
+    _networkClient->println();
+    _networkClient->println(body2send);
+    _networkClient->flush();
+  }
+
+  // Device ID
+  _deviceID = "";
+  while (strlen(_deviceID) == 0)
+  {
+    String msg = "";
+    while (_networkClient->available())
+    {
+      char c = _networkClient->read();
+      msg += c;
+    }
+    int start = msg.indexOf("\"id\"");
+    int until = msg.indexOf("\":", start);
+    int until_n = msg.indexOf("\",", until);
+    if (until != -1 && start != -1)
+    {
+      _deviceID = strdup(msg.substring(until + 3, until_n).c_str());
+      Serial.print("Device ID for ");
+      Serial.print(deviceName);
+      Serial.print(" is ");
+      Serial.println(_deviceID);
+      return storeDeviceID();
+    }
+  }
+}
+
 // Register device on the cloud and obtain the device id
 /**
  * @brief Registers the device with Cumulocity.
@@ -398,7 +501,7 @@ int HttpUpstreamClient::registerDevice(char *host, char *deviceName, char *suppo
     Serial.println("Was unable to load host and device credentials from EEPROM. Requesting new device credentials from tenant.");
     status = requestDeviceCredentialsFromTenant(host);
   }
-  if (strcmp(_host, host))
+  else if (strcmp(_host, host))
   {
     Serial.println("Host changed. Requesting new device credentials from tenant.");
     status = requestDeviceCredentialsFromTenant(host);
@@ -408,58 +511,12 @@ int HttpUpstreamClient::registerDevice(char *host, char *deviceName, char *suppo
     return status;
   }
 
-  // JSON Body
-  DynamicJsonDocument body(
-      JSON_OBJECT_SIZE(2) +
-      strlen(deviceName) + 1 +
-      2);
-  String body2send = "";
-  body["name"] = deviceName;
-  body["c8y_IsDevice"] = "{}";
-  serializeJson(body, body2send);
-
-  // HTTP header
-  if (_networkClient->connected())
-    _networkClient->stop();
-  if (_networkClient->connect(_host, 443))
+  status = loadDeviceIDFromEEPROM();
+  if (status)
   {
-    Serial.println("Registering device...");
-    _networkClient->println("POST /inventory/managedObjects/ HTTP/1.1");
-    _networkClient->print("Host: ");
-    _networkClient->println(_host);
-    _networkClient->print("Authorization: Basic ");
-    _networkClient->println(_deviceCredentials);
-    _networkClient->println("Content-Type: application/json");
-    _networkClient->print("Content-Length: ");
-    _networkClient->println(body2send.length());
-    _networkClient->println("Accept: application/json");
-    _networkClient->println();
-    _networkClient->println(body2send);
-    _networkClient->flush();
+    status = registerDeviceWithTenant(deviceName);
   }
-
-  // Device ID
-  while (_deviceID.length() == 0)
-  {
-    String msg = "";
-    while (_networkClient->available())
-    {
-      char c = _networkClient->read();
-      msg += c;
-    }
-    int start = msg.indexOf("\"id\"");
-    int until = msg.indexOf("\":", start);
-    int until_n = msg.indexOf("\",", until);
-    if (until != -1 && start != -1)
-    {
-      _deviceID = msg.substring(until + 3, until_n);
-      Serial.print("Device ID for ");
-      Serial.print(deviceName);
-      Serial.print(" is ");
-      Serial.println(_deviceID);
-      return 0;
-    }
-  }
+  return status;
 }
 
 // Measurement Type: c8y_Typemeasuremnt
@@ -488,15 +545,15 @@ void HttpUpstreamClient::sendMeasurement(int value, char *unit, String timestamp
       strlen(c8y_measurementObjectName) +
       strlen(unit) +
       String(value).length() +
-      _deviceID.length() +
+      strlen(_deviceID) +
       timestamp.length() +
       strlen(type) +
       69 + // length of template string without placeholders
       1;   // string terminator
   char body2send[contentLength];
-  snprintf_P(body2send, contentLength, PSTR("{\"%s\":{\"%s\":{\"unit\":\"%s\",\"value\":%i}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\",\"type\":\"%s\"}"), Name, c8y_measurementObjectName, unit, value, _deviceID.c_str(), timestamp.c_str(), type);
+  snprintf_P(body2send, contentLength, PSTR("{\"%s\":{\"%s\":{\"unit\":\"%s\",\"value\":%i}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\",\"type\":\"%s\"}"), Name, c8y_measurementObjectName, unit, value, _deviceID, timestamp.c_str(), type);
 
-  if (_deviceID.length() != 0)
+  if (strlen(_deviceID) != 0)
   {
     if (_networkClient->connected())
       _networkClient->stop();
@@ -537,16 +594,16 @@ void HttpUpstreamClient::sendAlarm(char *alarm_Type, char *alarm_Text, char *sev
 
   int contentLength =
       strlen(severity) +
-      _deviceID.length() +
+      strlen(_deviceID) +
       strlen(alarm_Text) +
       timestamp.length() +
       strlen(alarm_Type) +
       64 + // length of template string without placeholders
       1;   // string terminator
   char body2send[contentLength];
-  snprintf_P(body2send, contentLength, PSTR("{\"severity\":\"%s\",\"source\":{\"id\":\"%s\"},\"text\":\"%s\",\"time\":\"%s\",\"type\":\"%s\"}"), severity, _deviceID.c_str(), alarm_Text, timestamp.c_str(), alarm_Type);
+  snprintf_P(body2send, contentLength, PSTR("{\"severity\":\"%s\",\"source\":{\"id\":\"%s\"},\"text\":\"%s\",\"time\":\"%s\",\"type\":\"%s\"}"), severity, _deviceID, alarm_Text, timestamp.c_str(), alarm_Type);
 
-  if (_deviceID.length() != 0)
+  if (strlen(_deviceID) != 0)
   {
     if (_networkClient->connected())
       _networkClient->stop();
@@ -576,16 +633,16 @@ void HttpUpstreamClient::sendEvent(char *event_Type, char *event_Text, String ti
   Serial.println(_deviceID);
 
   int contentLength =
-      _deviceID.length() +
+      strlen(_deviceID) +
       strlen(event_Text) +
       timestamp.length() +
       strlen(event_Type) +
       50 + // length of template string without placeholders
       1;   // string terminator
   char body2send[contentLength];
-  snprintf_P(body2send, contentLength, PSTR("{\"source\":{\"id\":\"%s\"},\"text\":\"%s\",\"time\":\"%s\",\"type\":\"%s\"}"), _deviceID.c_str(), event_Text, timestamp.c_str(), event_Type);
+  snprintf_P(body2send, contentLength, PSTR("{\"source\":{\"id\":\"%s\"},\"text\":\"%s\",\"time\":\"%s\",\"type\":\"%s\"}"), _deviceID, event_Text, timestamp.c_str(), event_Type);
 
-  if (_deviceID.length() != 0)
+  if (strlen(_deviceID) != 0)
   {
     if (_networkClient->connected())
       _networkClient->stop();
