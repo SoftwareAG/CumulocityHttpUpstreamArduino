@@ -7,6 +7,8 @@
 #include <Base64.h>
 #include <ArduinoJson.h>
 #include <string.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 
 class HttpUpstreamClient
 {
@@ -39,13 +41,13 @@ public:
   void removeDevice(bool forceClearEEPROM);
 
   // send a single measurement to the cloud without knowing the device ID
-  void sendMeasurement(int value, char *unit, String timestamp, char *measurementType, char *measurementObjectName, char *Name);
+  void sendMeasurement(int value, char *unit, char *measurementType, char *measurementObjectName, char *Name);
 
   // send an alarm to the cloud without knowing the device ID
-  void sendAlarm(char *alarm_Type, char *alarm_Text, char *severity, String timestamp);
+  void sendAlarm(char *alarm_Type, char *alarm_Text, char *severity);
 
   // send a event to the cloud without knowing the device ID
-  void sendEvent(char *event_Type, char *event_Text, String timestamp);
+  void sendEvent(char *event_Type, char *event_Text);
 };
 
 #endif

@@ -3,7 +3,8 @@
 #include <EEPROM.h>
 #include <ArduinoJson.h>
 
-// todo: device id must be entered in c8y web UI -> display mac address, which is used as device id in console
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
 
 /**
  * \mainpage
@@ -488,6 +489,7 @@ int HttpUpstreamClient::registerDevice(char *host, char *deviceName)
  */
 int HttpUpstreamClient::registerDevice(char *host, char *deviceName, char *supportedOperations[])
 {
+  timeClient.begin();
 #if defined(ARDUINO_ARCH_ESP32)
   Serial.println("EEPROM.begin(512)");
   Serial.println(EEPROM.begin(512));
@@ -526,7 +528,6 @@ int HttpUpstreamClient::registerDevice(char *host, char *deviceName, char *suppo
  *
  * @param value
  * @param unit The unit of the measurement, such as "Wh" or "C".
- * @param timestamp Time of the measurement.
  * @param c8y_measurementType The most specific type of this entire measurement.
  * @param c8y_measurementObjectName
  * @param Name
@@ -535,10 +536,13 @@ int HttpUpstreamClient::registerDevice(char *host, char *deviceName, char *suppo
 // todo: unit should be optional
 // todo: What about floating point values? c8y doc mentions both 64 bit floats and 64 bit signed integers.
 // todo: Name arguments consistently with c8y
-void HttpUpstreamClient::sendMeasurement(int value, char *unit, String timestamp, char *type, char *c8y_measurementObjectName, char *Name)
+void HttpUpstreamClient::sendMeasurement(int value, char *unit, char *type, char *c8y_measurementObjectName, char *Name)
 {
   Serial.print("Preparing to send measurement with device ID: ");
   Serial.println(_deviceID);
+
+  timeClient.update();
+  String timestamp = timeClient.getFormattedDate();
 
   int contentLength =
       strlen(Name) +
@@ -587,10 +591,13 @@ void HttpUpstreamClient::sendMeasurement(int value, char *unit, String timestamp
   }
 }
 
-void HttpUpstreamClient::sendAlarm(char *alarm_Type, char *alarm_Text, char *severity, String timestamp)
+void HttpUpstreamClient::sendAlarm(char *alarm_Type, char *alarm_Text, char *severity)
 {
   Serial.print("Preparing to send alarm with device ID: ");
   Serial.println(_deviceID);
+
+  timeClient.update();
+  String timestamp = timeClient.getFormattedDate();
 
   int contentLength =
       strlen(severity) +
@@ -627,10 +634,13 @@ void HttpUpstreamClient::sendAlarm(char *alarm_Type, char *alarm_Text, char *sev
   }
 }
 
-void HttpUpstreamClient::sendEvent(char *event_Type, char *event_Text, String timestamp)
+void HttpUpstreamClient::sendEvent(char *event_Type, char *event_Text)
 {
   Serial.print("Preparing to send event with device ID: ");
   Serial.println(_deviceID);
+
+  timeClient.update();
+  String timestamp = timeClient.getFormattedDate();
 
   int contentLength =
       strlen(_deviceID) +
