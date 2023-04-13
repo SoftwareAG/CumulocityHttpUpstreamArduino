@@ -1,7 +1,4 @@
 #include "HttpUpstream.h"
-#include <WiFi.h>
-#include <EEPROM.h>
-#include <ArduinoJson.h>
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
@@ -11,7 +8,7 @@ NTPClient timeClient(ntpUDP);
  *
  * \section Introduction
  *
- * This is a library for uploading data from an Arduino micro controller to Cumulocity. This was developed for the [IoT Education Package (IoTEP)](https://education.softwareag.com/internet-of-things).
+ * This is a library for uploading data from an Arduino micro controller to Cumulocity IoT. This was developed for the [IoT Education Package (IoTEP)](https://education.softwareag.com/internet-of-things).
  *
  * \section Installation
  *
@@ -22,7 +19,7 @@ NTPClient timeClient(ntpUDP);
  *
  * In its current state this library does only offer a limited set of capabilities, which are important for IoTEP tutorials.
  *
- * Currently this library does not follow security best practices. Instead of using device specific credentials, it uses user credentials.
+ * sendMeasurement can only send a single series' measurement at a time.
  */
 
 // Implementations notes
@@ -39,11 +36,13 @@ HttpUpstreamClient::HttpUpstreamClient(Client &networkClient)
 }
 
 /**
- * \brief Stores device credentials for further authentication
+ * \brief Persists host and encoded device credentials in EEPROM.
  *
  * @param tenantId
  * @param username
  * @param password
+ *
+ * @return int status code; 0 = ok, 1 = Combination of host and encoded device credentials too long for EEPROM.
  */
 int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *tenantId, const char *username, const char *password)
 {
@@ -84,27 +83,26 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
   strcpy(_deviceCredentials, encodedString);
 #endif
   // EEPROM memory layout is
-  // * 4 bytes for host length
-  // * 4 bytes for credentials length
+  // * 1 byte for host length
+  // * 1 byte for credentials length
+  // * 1 byte for device id length
   // * host string
   // * credentials string
+  // * device id string
 
-  // todo: start remove
-  Serial.println("---------------------");
   Serial.println("Storing into EEPROM...");
   Serial.print("_host: ");
   Serial.println(_host);
   Serial.print("_deviceCredentials: ");
   Serial.println(_deviceCredentials);
-  Serial.println("---------------------");
-  // todo: end remove
 
-  // todo: check whether uint16_t works as well, that would save 4 bytes EEPROM total, maybe even uint8_t, because credentials and URL should be <= 255 characters?
+  // uint16_t instead of uint8_t, because addition of two uint8_t would potentially overflow
   uint16_t hostLength = strlen(_host) + 1;
   uint16_t deviceCredentialsLength = strlen(_deviceCredentials) + 1;
 
   if (hostLength > 254 || deviceCredentialsLength > 254 || hostLength + deviceCredentialsLength + 3 > 512)
   {
+    Serial.println("WARNING:");
     Serial.println("Combination of host and device credentials too long for EEPROM.");
     Serial.println("Host and device credentials will not be persisted.");
     return 1;
@@ -123,28 +121,29 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
   }
 
 #if defined(ARDUINO_ARCH_ESP32)
-  Serial.println("Committing to EEPROM.");
   EEPROM.commit();
 #endif
   return 0;
 }
 
+/**
+ * @brief Persists _deviceID in EEPROM.
+ *
+ * @return int status code; 0 = ok, 2 = Combination of host, device credentials and device ID too long for EEPROM.
+ */
 int HttpUpstreamClient::storeDeviceID()
 {
   uint16_t hostLength = strlen(_host) + 1;
   uint16_t deviceCredentialsLength = strlen(_deviceCredentials) + 1;
   uint16_t deviceIDLength = strlen(_deviceID) + 1;
 
-  // todo: start remove
-  Serial.println("---------------------");
   Serial.println("Storing into EEPROM...");
   Serial.print("_deviceID: ");
   Serial.println(_deviceID);
-  Serial.println("---------------------");
-  // todo: end remove = strlen(_deviceID) + 1;
 
   if (hostLength > 254 || deviceCredentialsLength > 254 || deviceIDLength > 254 || hostLength + deviceCredentialsLength + deviceIDLength + 3 > 512)
   {
+    Serial.println("WARNING:");
     Serial.println("Combination of host, device credentials and device ID too long for EEPROM.");
     Serial.println("Device ID will not be persisted.");
     return 2;
@@ -167,13 +166,13 @@ int HttpUpstreamClient::storeDeviceID()
   return 0;
 }
 /**
- * @brief Loads device credentials and host from EEPROM and puts it into corresponding private vars.
+ * @brief Loads encoded device credentials and host from EEPROM and puts it into corresponding private vars.
  *
  * Host is loaded into _host
  *
  * Device credentials are loaded into _deviceCredentials
  *
- * @return int 0 = success, 1 = Could not get host and device credentials from EEPROM
+ * @return int 0 = ok, 1 = Could not get host and device credentials from EEPROM
  */
 int HttpUpstreamClient::loadDeviceCredentialsAndHostFromEEPROM()
 {
@@ -215,31 +214,24 @@ int HttpUpstreamClient::loadDeviceCredentialsAndHostFromEEPROM()
   if (hostLength > 0 && deviceCredentialsLength > 0)
   {
     int contentLength = 53 + hostLength + 1;
-    char message[contentLength];
-    snprintf_P(message, contentLength, PSTR("Got host and device credentials from EEPROM. Host is %s"), _host);
-    Serial.println(message);
 
-    // todo: start remove
-    Serial.println("---------------------");
     Serial.println("Loaded from EEPROM...");
     Serial.print("_host: ");
     Serial.println(_host);
     Serial.print("_deviceCredentials: ");
     Serial.println(_deviceCredentials);
-    Serial.println("---------------------");
-    // todo: end remove
 
     // Success
     return 0;
   }
   // Could not get host and device credentials from EEPROM
-  return 2;
+  return 1;
 }
 
 /**
  * @brief Removes device from tenant.
  *
- * Removes device from tenant and clears EEPROM, which stores tenant host and device credentials.
+ * Removes device from tenant and clears EEPROM, which stores tenant host and encoded device credentials.
  *
  * Will not clear EEPROM in case the device cannot be removed from the tenant.
  */
@@ -287,10 +279,10 @@ void HttpUpstreamClient::removeDevice(bool forceClearEEPROM)
 }
 
 /**
- * @brief
+ * @brief Request device credentials from tenant
  *
  * @param host Cumulocity tenant domain name, e.g. iotep.cumulocity.com
- * @return int 0 = success
+ * @return int 0 = ok
  */
 int HttpUpstreamClient::requestDeviceCredentialsFromTenant(char *host)
 {
@@ -307,11 +299,15 @@ int HttpUpstreamClient::requestDeviceCredentialsFromTenant(char *host)
   int contentLength =
       id.length() +
       9 + // length of template string without placeholders
-      1;  // probably the \n by println(body2send) instead of print(body2send) ?
+      1;  // null terminator
   char body2send[contentLength];
   snprintf_P(body2send, contentLength, PSTR("{\"id\":\"%s\"}"), id.c_str());
 
-  // todo: think about timeout
+  Serial.println("Requesting device credentials...");
+  Serial.print("Please register a new device with device ID ");
+  Serial.print(id);
+  Serial.println(" in your tenant.");
+
   String msg = "";
   while (true)
   {
@@ -319,11 +315,6 @@ int HttpUpstreamClient::requestDeviceCredentialsFromTenant(char *host)
       _networkClient->stop();
     if (_networkClient->connect(host, 443))
     {
-      Serial.println("Requesting device credentials...");
-      Serial.print("Please register a new device with device ID ");
-      Serial.print(id);
-      Serial.println(" in your tenant.");
-
       _networkClient->println("POST /devicecontrol/deviceCredentials HTTP/1.1");
       _networkClient->print("Host: ");
       _networkClient->println(host);
@@ -354,9 +345,11 @@ int HttpUpstreamClient::requestDeviceCredentialsFromTenant(char *host)
         }
         else if (msg.indexOf(String("{")) == -1)
         {
+          // Discards responses, which do not contain JSON
         }
         else
         {
+          // Strip header from response
           while (!msg.startsWith(String("\r\n\r\n")))
           {
             msg.remove(0, 1);
@@ -375,6 +368,11 @@ int HttpUpstreamClient::requestDeviceCredentialsFromTenant(char *host)
   }
 }
 
+/**
+ * @brief Loads device id from EEPROM
+ *
+ * @return int 0 = ok, 1 = Could not load device id from EEPROM
+ */
 int HttpUpstreamClient::loadDeviceIDFromEEPROM()
 {
   Serial.println("Loading device ID from EEPROM...");
@@ -401,6 +399,12 @@ int HttpUpstreamClient::loadDeviceIDFromEEPROM()
   return 0;
 }
 
+/**
+ * @brief Creates device on tenant
+ *
+ * @param deviceName
+ * @return int status code; 0 = ok, 2 = Combination of host, device credentials and device ID too long for EEPROM.
+ */
 int HttpUpstreamClient::registerDeviceWithTenant(char *deviceName)
 {
   // JSON Body
@@ -458,15 +462,15 @@ int HttpUpstreamClient::registerDeviceWithTenant(char *deviceName)
   }
 }
 
-// Register device on the cloud and obtain the device id
 /**
- * @brief Registers the device with Cumulocity.
+ * @brief Register device with Cumulocity
  *
  * Will busy wait for you to accept the device in device management.
  *
  * This method will store the host and device credentials in EEPROM. If the host argument is identical to the host in EEPROM, the device will be assumed to be already registered with your tenant.
  * If the tenant state does not match this assumption, the method will return an error code. In this case, load a sketch, which calls _removeDevice_.
  *
+ * @param host Cumulocity tenant domain name, e.g. iotep.cumulocity.com
  * @param deviceName
  * @return int 0 = success
  */
@@ -485,19 +489,17 @@ int HttpUpstreamClient::registerDevice(char *host, char *deviceName)
  * @param deviceName
  * @param supportedOperations
  *
- * @return int 0 = success
+ * @return int 0 = ok, 1-2: not ok
  */
 int HttpUpstreamClient::registerDevice(char *host, char *deviceName, char *supportedOperations[])
 {
   timeClient.begin();
 #if defined(ARDUINO_ARCH_ESP32)
-  Serial.println("EEPROM.begin(512)");
   Serial.println(EEPROM.begin(512));
 #endif
   Serial.println("Preparing to register device.");
 
   int status = loadDeviceCredentialsAndHostFromEEPROM();
-  // POSIX exit status convention. 0 = success, 1 to 255 = something else
   if (status == 1)
   {
     Serial.println("Was unable to load host and device credentials from EEPROM. Requesting new device credentials from tenant.");
@@ -521,76 +523,166 @@ int HttpUpstreamClient::registerDevice(char *host, char *deviceName, char *suppo
   return status;
 }
 
-// Measurement Type: c8y_Typemeasuremnt
-// Measuremnt Name: c8y_measurmentname
 /**
- * @brief Sends a measurement.
+ * @brief Send measurement
  *
+ * @param type
+ * @param fragment
+ * @param series
  * @param value
- * @param unit The unit of the measurement, such as "Wh" or "C".
- * @param c8y_measurementType The most specific type of this entire measurement.
- * @param c8y_measurementObjectName
- * @param Name
- * @param host
+ * @return int 0 = ok, 1 = register device first
  */
-// todo: unit should be optional
-// todo: What about floating point values? c8y doc mentions both 64 bit floats and 64 bit signed integers.
-// todo: Name arguments consistently with c8y
-void HttpUpstreamClient::sendMeasurement(int value, char *unit, char *type, char *c8y_measurementObjectName, char *Name)
+int HttpUpstreamClient::sendMeasurement(char *type, char *fragment, char *series, int value)
 {
-  Serial.print("Preparing to send measurement with device ID: ");
-  Serial.println(_deviceID);
-
   timeClient.update();
   String timestamp = timeClient.getFormattedDate();
 
   int contentLength =
-      strlen(Name) +
-      strlen(c8y_measurementObjectName) +
-      strlen(unit) +
+      strlen(type) +
+      strlen(fragment) +
+      strlen(series) +
       String(value).length() +
+      strlen(_deviceID) +
+      timestamp.length() +
+      strlen(type) +
+      59 + // length of template string without placeholders
+      1;   // string terminator
+  char body2send[contentLength];
+  snprintf_P(body2send, contentLength, PSTR("{\"type\":\"%s\",\"%s\":{\"%s\":{\"value\":%i}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\"}"), type, fragment, series, value, _deviceID, timestamp.c_str());
+  return sendMeasurement(body2send);
+}
+
+/**
+ * @brief Send measurement
+ *
+ * @param type
+ * @param fragment
+ * @param series
+ * @param value
+ * @param unit
+ * @return int 0 = ok, 1 = register device first
+ */
+int HttpUpstreamClient::sendMeasurement(char *type, char *fragment, char *series, int value, char *unit)
+{
+  timeClient.update();
+  String timestamp = timeClient.getFormattedDate();
+
+  int contentLength =
+      strlen(type) +
+      strlen(fragment) +
+      strlen(series) +
+      String(value).length() +
+      strlen(unit) +
       strlen(_deviceID) +
       timestamp.length() +
       strlen(type) +
       69 + // length of template string without placeholders
       1;   // string terminator
   char body2send[contentLength];
-  snprintf_P(body2send, contentLength, PSTR("{\"%s\":{\"%s\":{\"unit\":\"%s\",\"value\":%i}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\",\"type\":\"%s\"}"), Name, c8y_measurementObjectName, unit, value, _deviceID, timestamp.c_str(), type);
+  snprintf_P(body2send, contentLength, PSTR("{\"type\":\"%s\",\"%s\":{\"%s\":{\"value\":%i,\"unit\":\"%s\"}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\"}"), type, fragment, series, value, _deviceID, timestamp.c_str());
+  return sendMeasurement(body2send);
+}
 
-  if (strlen(_deviceID) != 0)
+/**
+ * @brief Send measurement
+ *
+ * @param type
+ * @param fragment
+ * @param series
+ * @param value
+ * @return int 0 = ok, 1 = register device first
+ */
+int HttpUpstreamClient::sendMeasurement(char *type, char *fragment, char *series, float value)
+{
+  timeClient.update();
+  String timestamp = timeClient.getFormattedDate();
+
+  int contentLength =
+      strlen(type) +
+      strlen(fragment) +
+      strlen(series) +
+      String(value).length() +
+      strlen(_deviceID) +
+      timestamp.length() +
+      strlen(type) +
+      59 + // length of template string without placeholders
+      1;   // string terminator
+  char body2send[contentLength];
+  snprintf_P(body2send, contentLength, PSTR("{\"type\":\"%s\",\"%s\":{\"%s\":{\"value\":%f}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\"}"), type, fragment, series, value, _deviceID, timestamp.c_str());
+  return sendMeasurement(body2send);
+}
+
+/**
+ * @brief Send measurement
+ *
+ * @param type
+ * @param fragment
+ * @param series
+ * @param value
+ * @param unit
+ * @return int 0 = ok, 1 = register device first
+ */
+int HttpUpstreamClient::sendMeasurement(char *type, char *fragment, char *series, float value, char *unit)
+{
+  timeClient.update();
+  String timestamp = timeClient.getFormattedDate();
+
+  int contentLength =
+      strlen(type) +
+      strlen(fragment) +
+      strlen(series) +
+      String(value).length() +
+      strlen(unit) +
+      strlen(_deviceID) +
+      timestamp.length() +
+      strlen(type) +
+      69 + // length of template string without placeholders
+      1;   // string terminator
+  char body2send[contentLength];
+  snprintf_P(body2send, contentLength, PSTR("{\"type\":\"%s\",\"%s\":{\"%s\":{\"value\":%f,\"unit\":\"%s\"}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\"}"), type, fragment, series, value, _deviceID, timestamp.c_str());
+  return sendMeasurement(body2send);
+}
+
+int HttpUpStreamClient::sendMeasurement(char *body)
+{
+  Serial.print("Preparing to send measurement with device ID: ");
+  Serial.println(_deviceID);
+
+  if (strlen(_deviceID) == 0)
+    return 1;
+  if (_networkClient->connected())
+    _networkClient->stop();
+  if (_networkClient->connect(_host, 443))
   {
-    if (_networkClient->connected())
-      _networkClient->stop();
-    if (_networkClient->connect(_host, 443))
-    {
-      Serial.println("Sending measurement...");
+    Serial.println("Sending measurement...");
 
-      _networkClient->println("POST /measurement/measurements HTTP/1.1");
-      _networkClient->print("Host: ");
-      _networkClient->println(_host);
-      _networkClient->print("Authorization: Basic ");
-      _networkClient->println(_deviceCredentials);
-      _networkClient->println("Content-Type: application/json");
-      _networkClient->print("Content-Length: ");
-      _networkClient->println(contentLength);
-      _networkClient->println("Accept: application/json");
-      _networkClient->println();
-      _networkClient->println(body2send);
-      _networkClient->flush();
-    }
-    else
-    {
-      Serial.print("Could not connect to ");
-      Serial.println(_host);
-      Serial.println(WiFi.status());
-    }
+    _networkClient->println("POST /measurement/measurements HTTP/1.1");
+    _networkClient->print("Host: ");
+    _networkClient->println(_host);
+    _networkClient->print("Authorization: Basic ");
+    _networkClient->println(_deviceCredentials);
+    _networkClient->println("Content-Type: application/json");
+    _networkClient->print("Content-Length: ");
+    _networkClient->println(contentLength);
+    _networkClient->println("Accept: application/json");
+    _networkClient->println();
+    _networkClient->println(body2send);
+    _networkClient->flush();
+  }
+  else
+  {
+    Serial.print("Could not connect to ");
+    Serial.println(_host);
+    Serial.println(WiFi.status());
   }
   else
   {
     Serial.println("Device id undefined. Did you register the device?");
   }
+  return 0;
 }
 
+// todo: consistent argument names
 void HttpUpstreamClient::sendAlarm(char *alarm_Type, char *alarm_Text, char *severity)
 {
   Serial.print("Preparing to send alarm with device ID: ");
@@ -634,6 +726,7 @@ void HttpUpstreamClient::sendAlarm(char *alarm_Type, char *alarm_Text, char *sev
   }
 }
 
+// todo: consistent argument names
 void HttpUpstreamClient::sendEvent(char *event_Type, char *event_Text)
 {
   Serial.print("Preparing to send event with device ID: ");
