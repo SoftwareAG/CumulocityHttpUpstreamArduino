@@ -108,18 +108,36 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a75940ff0753f89071e44e1194e1e8966"><td class="memItemLeft" align="right" valign="top"><a id="a75940ff0753f89071e44e1194e1e8966" name="a75940ff0753f89071e44e1194e1e8966"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>HttpUpstreamClient</b> (Client &amp;networkClient)</td></tr>
 <tr class="separator:a75940ff0753f89071e44e1194e1e8966"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59ae5ff4811b705ec3b271951fff5e1a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#a59ae5ff4811b705ec3b271951fff5e1a">registerDevice</a> (char *deviceName, char *URL, char *username, char *password)</td></tr>
-<tr class="memdesc:a59ae5ff4811b705ec3b271951fff5e1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers the device with Cumulocity.  <br /></td></tr>
-<tr class="separator:a59ae5ff4811b705ec3b271951fff5e1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa18717ac3237adc94bc6ff5396ea350a"><td class="memItemLeft" align="right" valign="top"><a id="aa18717ac3237adc94bc6ff5396ea350a" name="aa18717ac3237adc94bc6ff5396ea350a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>sendMeasurement</b> (int value, char *unit, String timestamp, char *measurementType, char *measurementObjectName, char *Name, char *URL)</td></tr>
-<tr class="separator:aa18717ac3237adc94bc6ff5396ea350a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a49deb4de00849741ce1199df8ec40cb1"><td class="memItemLeft" align="right" valign="top"><a id="a49deb4de00849741ce1199df8ec40cb1" name="a49deb4de00849741ce1199df8ec40cb1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>sendAlarm</b> (char *alarm_Type, char *alarm_Text, char *severity, String timestamp, char *URL)</td></tr>
-<tr class="separator:a49deb4de00849741ce1199df8ec40cb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4e74498b5b0bfe725aa28528e94beaff"><td class="memItemLeft" align="right" valign="top"><a id="a4e74498b5b0bfe725aa28528e94beaff" name="a4e74498b5b0bfe725aa28528e94beaff"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>sendEvent</b> (char *event_Type, char *event_Text, String timestamp, char *URL)</td></tr>
-<tr class="separator:a4e74498b5b0bfe725aa28528e94beaff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa98b78c1c98e594f75f105f5b9a8bbd3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#aa98b78c1c98e594f75f105f5b9a8bbd3">registerDevice</a> (char *host, char *deviceName)</td></tr>
+<tr class="memdesc:aa98b78c1c98e594f75f105f5b9a8bbd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register device with Cumulocity.  <br /></td></tr>
+<tr class="separator:aa98b78c1c98e594f75f105f5b9a8bbd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6eba11cab4a3fced5a3451f3979aa6f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#aa6eba11cab4a3fced5a3451f3979aa6f">registerDevice</a> (char *host, char *deviceName, char *supportedOperations[])</td></tr>
+<tr class="memdesc:aa6eba11cab4a3fced5a3451f3979aa6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers the device with Cumulocity.  <br /></td></tr>
+<tr class="separator:aa6eba11cab4a3fced5a3451f3979aa6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75a881a1d52b13fca4184c0f40f6b832"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#a75a881a1d52b13fca4184c0f40f6b832">removeDevice</a> ()</td></tr>
+<tr class="memdesc:a75a881a1d52b13fca4184c0f40f6b832"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes device from tenant.  <br /></td></tr>
+<tr class="separator:a75a881a1d52b13fca4184c0f40f6b832"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2046e8710e097bde7a819beb28ea0055"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#a2046e8710e097bde7a819beb28ea0055">removeDevice</a> (bool forceClearEEPROM)</td></tr>
+<tr class="memdesc:a2046e8710e097bde7a819beb28ea0055"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes device from tenant.  <br /></td></tr>
+<tr class="separator:a2046e8710e097bde7a819beb28ea0055"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a964594a86c83697b28ff7d58adf4fe84"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#a964594a86c83697b28ff7d58adf4fe84">sendMeasurement</a> (char *type, char *fragment, char *series, int value)</td></tr>
+<tr class="memdesc:a964594a86c83697b28ff7d58adf4fe84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send measurement.  <br /></td></tr>
+<tr class="separator:a964594a86c83697b28ff7d58adf4fe84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b6fbf2f2622048e0a026288894ef902"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#a7b6fbf2f2622048e0a026288894ef902">sendMeasurement</a> (char *type, char *fragment, char *series, int value, char *unit)</td></tr>
+<tr class="memdesc:a7b6fbf2f2622048e0a026288894ef902"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send measurement.  <br /></td></tr>
+<tr class="separator:a7b6fbf2f2622048e0a026288894ef902"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af158947d9554e9b3b422e7094b0463c3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#af158947d9554e9b3b422e7094b0463c3">sendMeasurement</a> (char *type, char *fragment, char *series, float value)</td></tr>
+<tr class="memdesc:af158947d9554e9b3b422e7094b0463c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send measurement.  <br /></td></tr>
+<tr class="separator:af158947d9554e9b3b422e7094b0463c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3e547807eb028d973aa3ee2ac2e5508"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#ab3e547807eb028d973aa3ee2ac2e5508">sendMeasurement</a> (char *type, char *fragment, char *series, float value, char *unit)</td></tr>
+<tr class="memdesc:ab3e547807eb028d973aa3ee2ac2e5508"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send measurement.  <br /></td></tr>
+<tr class="separator:ab3e547807eb028d973aa3ee2ac2e5508"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0c7e6809cc0b4ba2194498c02119d90"><td class="memItemLeft" align="right" valign="top"><a id="ad0c7e6809cc0b4ba2194498c02119d90" name="ad0c7e6809cc0b4ba2194498c02119d90"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>sendAlarm</b> (char *alarm_Type, char *alarm_Text, char *severity)</td></tr>
+<tr class="separator:ad0c7e6809cc0b4ba2194498c02119d90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17a5baf98e0d724e325e5dedad22e34f"><td class="memItemLeft" align="right" valign="top"><a id="a17a5baf98e0d724e325e5dedad22e34f" name="a17a5baf98e0d724e325e5dedad22e34f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>sendEvent</b> (char *event_Type, char *event_Text)</td></tr>
+<tr class="separator:a17a5baf98e0d724e325e5dedad22e34f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Data Fields</h2></td></tr>
@@ -128,15 +146,61 @@ Client *&#160;</td><td class="memItemRight" valign="bottom"><b>_networkClient</b
 <tr class="separator:a98156bf0ceef503a8aac3fd24ab14969"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a59ae5ff4811b705ec3b271951fff5e1a" name="a59ae5ff4811b705ec3b271951fff5e1a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a59ae5ff4811b705ec3b271951fff5e1a">&#9670;&#160;</a></span>registerDevice()</h2>
+<a id="aa98b78c1c98e594f75f105f5b9a8bbd3" name="aa98b78c1c98e594f75f105f5b9a8bbd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa98b78c1c98e594f75f105f5b9a8bbd3">&#9670;&#160;</a></span>registerDevice() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void HttpUpstreamClient::registerDevice </td>
+          <td class="memname">int HttpUpstreamClient::registerDevice </td>
           <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>deviceName</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register device with Cumulocity. </p>
+<p>Will busy wait for you to accept the device in device management.</p>
+<p>This method will store the host and device credentials in EEPROM. If the host argument is identical to the host in EEPROM, the device will be assumed to be already registered with your tenant. If the tenant state does not match this assumption, the method will return an error code. In this case, load a sketch, which calls <em>removeDevice</em>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">host</td><td>Cumulocity tenant domain name, e.g. iotep.cumulocity.com </td></tr>
+    <tr><td class="paramname">deviceName</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>int 0 = success </dd></dl>
+
+</div>
+</div>
+<a id="aa6eba11cab4a3fced5a3451f3979aa6f" name="aa6eba11cab4a3fced5a3451f3979aa6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6eba11cab4a3fced5a3451f3979aa6f">&#9670;&#160;</a></span>registerDevice() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int HttpUpstreamClient::registerDevice </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">char *&#160;</td>
           <td class="paramname"><em>deviceName</em>, </td>
         </tr>
@@ -144,19 +208,7 @@ Client *&#160;</td><td class="memItemRight" valign="bottom"><b>_networkClient</b
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>URL</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>username</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>password</em>&#160;</td>
+          <td class="paramname"><em>supportedOperations</em>[]&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -167,15 +219,287 @@ Client *&#160;</td><td class="memItemRight" valign="bottom"><b>_networkClient</b
 </div><div class="memdoc">
 
 <p>Registers the device with Cumulocity. </p>
+<p>Sames as above, but with supportedOperations</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">host</td><td>Cumulocity tenant domain name, e.g. iotep.cumulocity.com </td></tr>
     <tr><td class="paramname">deviceName</td><td></td></tr>
-    <tr><td class="paramname">URL</td><td>Cumulocity tenant domain name, e.g. iotep.cumulocity.com </td></tr>
-    <tr><td class="paramname">username</td><td></td></tr>
-    <tr><td class="paramname">password</td><td></td></tr>
+    <tr><td class="paramname">supportedOperations</td><td></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>int 0 = ok, 1-2: not ok </dd></dl>
+
+</div>
+</div>
+<a id="a75a881a1d52b13fca4184c0f40f6b832" name="a75a881a1d52b13fca4184c0f40f6b832"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75a881a1d52b13fca4184c0f40f6b832">&#9670;&#160;</a></span>removeDevice() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HttpUpstreamClient::removeDevice </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Removes device from tenant. </p>
+<p>Removes device from tenant and clears EEPROM, which stores tenant host and encoded device credentials.</p>
+<p>Will not clear EEPROM in case the device cannot be removed from the tenant. </p>
+
+</div>
+</div>
+<a id="a2046e8710e097bde7a819beb28ea0055" name="a2046e8710e097bde7a819beb28ea0055"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2046e8710e097bde7a819beb28ea0055">&#9670;&#160;</a></span>removeDevice() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HttpUpstreamClient::removeDevice </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>forceClearEEPROM</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Removes device from tenant. </p>
+<p>Removes device from tenant and clears EEPROM, which stores tenant host and device credentials.</p>
+<p>You can specify whether to force clear EEPROM when the device cannot be removed from the tenant. (E.g. in case you already removed it manually.)</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">forceClearEEPROM</td><td>whether to clear EEPROM even when device cannot be removed from the tenant. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af158947d9554e9b3b422e7094b0463c3" name="af158947d9554e9b3b422e7094b0463c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af158947d9554e9b3b422e7094b0463c3">&#9670;&#160;</a></span>sendMeasurement() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int HttpUpstreamClient::sendMeasurement </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>fragment</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>series</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Send measurement. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td></td></tr>
+    <tr><td class="paramname">fragment</td><td></td></tr>
+    <tr><td class="paramname">series</td><td></td></tr>
+    <tr><td class="paramname">value</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>int 0 = ok, 1 = register device first </dd></dl>
+
+</div>
+</div>
+<a id="ab3e547807eb028d973aa3ee2ac2e5508" name="ab3e547807eb028d973aa3ee2ac2e5508"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3e547807eb028d973aa3ee2ac2e5508">&#9670;&#160;</a></span>sendMeasurement() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int HttpUpstreamClient::sendMeasurement </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>fragment</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>series</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>unit</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Send measurement. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td></td></tr>
+    <tr><td class="paramname">fragment</td><td></td></tr>
+    <tr><td class="paramname">series</td><td></td></tr>
+    <tr><td class="paramname">value</td><td></td></tr>
+    <tr><td class="paramname">unit</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>int 0 = ok, 1 = register device first </dd></dl>
+
+</div>
+</div>
+<a id="a964594a86c83697b28ff7d58adf4fe84" name="a964594a86c83697b28ff7d58adf4fe84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a964594a86c83697b28ff7d58adf4fe84">&#9670;&#160;</a></span>sendMeasurement() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int HttpUpstreamClient::sendMeasurement </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>fragment</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>series</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Send measurement. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td></td></tr>
+    <tr><td class="paramname">fragment</td><td></td></tr>
+    <tr><td class="paramname">series</td><td></td></tr>
+    <tr><td class="paramname">value</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>int 0 = ok, 1 = register device first </dd></dl>
+
+</div>
+</div>
+<a id="a7b6fbf2f2622048e0a026288894ef902" name="a7b6fbf2f2622048e0a026288894ef902"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b6fbf2f2622048e0a026288894ef902">&#9670;&#160;</a></span>sendMeasurement() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int HttpUpstreamClient::sendMeasurement </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>fragment</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>series</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>unit</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Send measurement. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td></td></tr>
+    <tr><td class="paramname">fragment</td><td></td></tr>
+    <tr><td class="paramname">series</td><td></td></tr>
+    <tr><td class="paramname">value</td><td></td></tr>
+    <tr><td class="paramname">unit</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>int 0 = ok, 1 = register device first </dd></dl>
 
 </div>
 </div>

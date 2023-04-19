@@ -1,0 +1,6 @@
+<doxygenlayout version="1.0">
+  <navindex>
+    <tab type="mainpage" visible="yes" title=""/>
+    <tab type="user" visible="yes" title="HttpUpstreamClient Class Reference" url="@ref HttpUpstreamClient">
+  </navindex>
+</doxygenlayout>

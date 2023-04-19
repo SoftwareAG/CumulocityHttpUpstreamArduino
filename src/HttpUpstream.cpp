@@ -6,16 +6,16 @@ NTPClient timeClient(ntpUDP);
 /**
  * \mainpage
  *
- * \section Introduction
+ * \subsection Introduction
  *
  * This is a library for uploading data from an Arduino micro controller to Cumulocity IoT. This was developed for the [IoT Education Package (IoTEP)](https://education.softwareag.com/internet-of-things).
  *
- * \section Installation
+ * \subsection Installation
  *
  * This library is on the Arduino Library Manager list.
  * You can install it in the Arduino IDE at Tools -> Manage Libraries... Search for and install _Cumulocity IoT Upstreaming_.
  *
- * \section Limitations
+ * \subsection Limitations
  *
  * In its current state this library does only offer a limited set of capabilities, which are important for IoTEP tutorials.
  *

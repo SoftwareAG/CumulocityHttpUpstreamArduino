@@ -25,25 +25,13 @@
 var NAVTREE =
 [
   [ "IoTEP Arduino Upstream Library", "index.html", [
-    [ "Introduction", "index.html#Introduction", null ],
-    [ "Installation", "index.html#Installation", null ],
-    [ "Data Structures", "annotated.html", [
-      [ "Data Structures", "annotated.html", "annotated_dup" ],
-      [ "Data Structure Index", "classes.html", null ],
-      [ "Data Fields", "functions.html", [
-        [ "All", "functions.html", null ],
-        [ "Functions", "functions_func.html", null ]
-      ] ]
-    ] ],
-    [ "Files", "files.html", [
-      [ "File List", "files.html", "files_dup" ]
-    ] ]
+    [ "HttpUpstreamClient Class Reference", "dc/dcb/class_http_upstream_client.html", null ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"annotated.html"
+"dc/dcb/class_http_upstream_client.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
