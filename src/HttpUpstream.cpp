@@ -93,8 +93,6 @@ int HttpUpstreamClient::storeDeviceCredentialsAndHost(char *host, const char *te
   Serial.println("Storing into EEPROM...");
   Serial.print("_host: ");
   Serial.println(_host);
-  Serial.print("_deviceCredentials: ");
-  Serial.println(_deviceCredentials);
 
   // uint16_t instead of uint8_t, because addition of two uint8_t would potentially overflow
   uint16_t hostLength = strlen(_host) + 1;
@@ -139,7 +137,14 @@ int HttpUpstreamClient::storeDeviceID()
 
   Serial.println("Storing into EEPROM...");
   Serial.print("_deviceID: ");
+  Serial.println("");
+  Serial.println("---");
+  Serial.println(_host);
+  Serial.println(_deviceCredentials);
   Serial.println(_deviceID);
+  Serial.println(hostLength);
+  Serial.println(deviceCredentialsLength);
+  Serial.println(deviceIDLength);
 
   if (hostLength > 254 || deviceCredentialsLength > 254 || deviceIDLength > 254 || hostLength + deviceCredentialsLength + deviceIDLength + 3 > 512)
   {
@@ -229,11 +234,13 @@ int HttpUpstreamClient::loadDeviceCredentialsAndHostFromEEPROM()
 }
 
 /**
- * @brief Removes device from tenant.
+ * @brief [todo] Removes device from tenant.
  *
  * Removes device from tenant and clears EEPROM, which stores tenant host and encoded device credentials.
  *
  * Will not clear EEPROM in case the device cannot be removed from the tenant.
+ * 
+ * todo: Currently this does nothing meaningful, because the network request for removing the device from the tenant is not implemented yet.
  */
 void HttpUpstreamClient::removeDevice()
 {
@@ -241,16 +248,21 @@ void HttpUpstreamClient::removeDevice()
 }
 
 /**
- * @brief Removes device from tenant.
+ * @brief [todo] Removes device from tenant.
  *
  * Removes device from tenant and clears EEPROM, which stores tenant host and device credentials.
  *
  * You can specify whether to force clear EEPROM when the device cannot be removed from the tenant. (E.g. in case you already removed it manually.)
  *
+ * todo: Currently this only force clears EEPROM, if the flag is set, because the network request for removing the device from the tenant is not implemented yet.
+ * 
  * @param forceClearEEPROM whether to clear EEPROM even when device cannot be removed from the tenant.
  */
 void HttpUpstreamClient::removeDevice(bool forceClearEEPROM)
 {
+  #if defined(ARDUINO_ARCH_ESP32)
+    Serial.println(EEPROM.begin(512));
+  #endif
   int status = loadDeviceCredentialsAndHostFromEEPROM();
   if (status == 1)
   {
@@ -262,7 +274,7 @@ void HttpUpstreamClient::removeDevice(bool forceClearEEPROM)
   {
     // todo: do HTTP stuff to remove device
   }
-  if (!status || forceClearEEPROM)
+  if (status || forceClearEEPROM)
   {
     for (int i = 0; i < EEPROM.length(); i++)
     {
@@ -357,7 +369,10 @@ int HttpUpstreamClient::requestDeviceCredentialsFromTenant(char *host)
           msg.remove(0, 4);
           DynamicJsonDocument doc(msg.length() + 101);
           deserializeJson(doc, msg);
-          storeDeviceCredentialsAndHost(host, doc["tenantId"], doc["username"], doc["password"]);
+          const char *tenantId = doc["tenantId"];
+          const char *username = doc["username"];
+          const char *password = doc["password"];
+          storeDeviceCredentialsAndHost(host, tenantId, username, password);
           _networkClient->stop();
           return 0;
         }
@@ -608,7 +623,7 @@ int HttpUpstreamClient::sendMeasurement(char *type, char *fragment, char *series
       59 + // length of template string without placeholders
       1;   // string terminator
   char body2send[contentLength];
-  snprintf_P(body2send, contentLength, PSTR("{\"type\":\"%s\",\"%s\":{\"%s\":{\"value\":%f}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\"}"), type, fragment, series, value, _deviceID, timestamp.c_str());
+  snprintf_P(body2send, contentLength, PSTR("{\"type\":\"%s\",\"%s\":{\"%s\":{\"value\":%s}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\"}"), type, fragment, series, String(value).c_str(), _deviceID, timestamp.c_str());
   return sendMeasurement(body2send);
 }
 
@@ -639,17 +654,20 @@ int HttpUpstreamClient::sendMeasurement(char *type, char *fragment, char *series
       69 + // length of template string without placeholders
       1;   // string terminator
   char body2send[contentLength];
-  snprintf_P(body2send, contentLength, PSTR("{\"type\":\"%s\",\"%s\":{\"%s\":{\"value\":%f,\"unit\":\"%s\"}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\"}"), type, fragment, series, value, _deviceID, timestamp.c_str());
+  snprintf_P(body2send, contentLength, PSTR("{\"type\":\"%s\",\"%s\":{\"%s\":{\"value\":%s,\"unit\":\"%s\"}},\"source\":{\"id\":\"%s\"},\"time\":\"%s\"}"), type, fragment, series, String(value).c_str(), unit, _deviceID, timestamp.c_str());
   return sendMeasurement(body2send);
 }
 
-int HttpUpStreamClient::sendMeasurement(char *body)
+int HttpUpstreamClient::sendMeasurement(char *body)
 {
   Serial.print("Preparing to send measurement with device ID: ");
   Serial.println(_deviceID);
 
   if (strlen(_deviceID) == 0)
+  {
+    Serial.println("Device id undefined. Did you register the device?");
     return 1;
+  }
   if (_networkClient->connected())
     _networkClient->stop();
   if (_networkClient->connect(_host, 443))
@@ -663,21 +681,11 @@ int HttpUpStreamClient::sendMeasurement(char *body)
     _networkClient->println(_deviceCredentials);
     _networkClient->println("Content-Type: application/json");
     _networkClient->print("Content-Length: ");
-    _networkClient->println(contentLength);
+    _networkClient->println(strlen(body));
     _networkClient->println("Accept: application/json");
     _networkClient->println();
-    _networkClient->println(body2send);
+    _networkClient->println(body);
     _networkClient->flush();
-  }
-  else
-  {
-    Serial.print("Could not connect to ");
-    Serial.println(_host);
-    Serial.println(WiFi.status());
-  }
-  else
-  {
-    Serial.println("Device id undefined. Did you register the device?");
   }
   return 0;
 }

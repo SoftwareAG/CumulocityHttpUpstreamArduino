@@ -20,6 +20,7 @@ private:
   char *_host;
   char *_deviceCredentials;
   char *_deviceID;
+  Client *_networkClient;
 
   int storeDeviceCredentialsAndHost(char *host, const char *tenantId, const char *username, const char *password);
   int storeDeviceID();
@@ -30,8 +31,6 @@ private:
   int sendMeasurement(char *body);
 
 public:
-  Client *_networkClient;
-
   HttpUpstreamClient(Client &networkClient);
 
   int registerDevice(char *host, char *deviceName);

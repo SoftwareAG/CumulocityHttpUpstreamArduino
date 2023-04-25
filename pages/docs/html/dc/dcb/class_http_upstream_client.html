@@ -97,8 +97,7 @@ $(document).ready(function(){initNavTree('dc/dcb/class_http_upstream_client.html
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Data Fields</a>  </div>
+<a href="#pub-methods">Public Member Functions</a>  </div>
   <div class="headertitle"><div class="title">HttpUpstreamClient Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -115,10 +114,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aa6eba11cab4a3fced5a3451f3979aa6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers the device with Cumulocity.  <br /></td></tr>
 <tr class="separator:aa6eba11cab4a3fced5a3451f3979aa6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75a881a1d52b13fca4184c0f40f6b832"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#a75a881a1d52b13fca4184c0f40f6b832">removeDevice</a> ()</td></tr>
-<tr class="memdesc:a75a881a1d52b13fca4184c0f40f6b832"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes device from tenant.  <br /></td></tr>
+<tr class="memdesc:a75a881a1d52b13fca4184c0f40f6b832"><td class="mdescLeft">&#160;</td><td class="mdescRight">[todo] Removes device from tenant.  <br /></td></tr>
 <tr class="separator:a75a881a1d52b13fca4184c0f40f6b832"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2046e8710e097bde7a819beb28ea0055"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#a2046e8710e097bde7a819beb28ea0055">removeDevice</a> (bool forceClearEEPROM)</td></tr>
-<tr class="memdesc:a2046e8710e097bde7a819beb28ea0055"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes device from tenant.  <br /></td></tr>
+<tr class="memdesc:a2046e8710e097bde7a819beb28ea0055"><td class="mdescLeft">&#160;</td><td class="mdescRight">[todo] Removes device from tenant.  <br /></td></tr>
 <tr class="separator:a2046e8710e097bde7a819beb28ea0055"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a964594a86c83697b28ff7d58adf4fe84"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcb/class_http_upstream_client.html#a964594a86c83697b28ff7d58adf4fe84">sendMeasurement</a> (char *type, char *fragment, char *series, int value)</td></tr>
 <tr class="memdesc:a964594a86c83697b28ff7d58adf4fe84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send measurement.  <br /></td></tr>
@@ -138,12 +137,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sendAlarm</b> (char *
 <tr class="memitem:a17a5baf98e0d724e325e5dedad22e34f"><td class="memItemLeft" align="right" valign="top"><a id="a17a5baf98e0d724e325e5dedad22e34f" name="a17a5baf98e0d724e325e5dedad22e34f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>sendEvent</b> (char *event_Type, char *event_Text)</td></tr>
 <tr class="separator:a17a5baf98e0d724e325e5dedad22e34f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Data Fields</h2></td></tr>
-<tr class="memitem:a98156bf0ceef503a8aac3fd24ab14969"><td class="memItemLeft" align="right" valign="top"><a id="a98156bf0ceef503a8aac3fd24ab14969" name="a98156bf0ceef503a8aac3fd24ab14969"></a>
-Client *&#160;</td><td class="memItemRight" valign="bottom"><b>_networkClient</b></td></tr>
-<tr class="separator:a98156bf0ceef503a8aac3fd24ab14969"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="aa98b78c1c98e594f75f105f5b9a8bbd3" name="aa98b78c1c98e594f75f105f5b9a8bbd3"></a>
@@ -247,9 +240,10 @@ Client *&#160;</td><td class="memItemRight" valign="bottom"><b>_networkClient</b
       </table>
 </div><div class="memdoc">
 
-<p>Removes device from tenant. </p>
+<p>[todo] Removes device from tenant. </p>
 <p>Removes device from tenant and clears EEPROM, which stores tenant host and encoded device credentials.</p>
-<p>Will not clear EEPROM in case the device cannot be removed from the tenant. </p>
+<p>Will not clear EEPROM in case the device cannot be removed from the tenant.</p>
+<p>todo: Currently this does nothing meaningful, because the network request for removing the device from the tenant is not implemented yet. </p>
 
 </div>
 </div>
@@ -269,9 +263,10 @@ Client *&#160;</td><td class="memItemRight" valign="bottom"><b>_networkClient</b
       </table>
 </div><div class="memdoc">
 
-<p>Removes device from tenant. </p>
+<p>[todo] Removes device from tenant. </p>
 <p>Removes device from tenant and clears EEPROM, which stores tenant host and device credentials.</p>
 <p>You can specify whether to force clear EEPROM when the device cannot be removed from the tenant. (E.g. in case you already removed it manually.)</p>
+<p>todo: Currently this only force clears EEPROM, if the flag is set, because the network request for removing the device from the tenant is not implemented yet.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">forceClearEEPROM</td><td>whether to clear EEPROM even when device cannot be removed from the tenant. </td></tr>
