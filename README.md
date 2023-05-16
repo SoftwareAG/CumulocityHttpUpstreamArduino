@@ -18,6 +18,6 @@ The University Relation created the library which is used for arduino containing
 
 Documentation is available online [here](todo).
 
-If you want to download the documentation, you can grab the _pages/docs/html_ folder.
 
-For regenerating documentation from source, install and run `doxygen`
+This is the latest version of the library. However, due to the hardware, Arduino, the usability is not stable.
+
