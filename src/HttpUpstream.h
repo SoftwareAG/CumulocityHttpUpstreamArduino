@@ -4,42 +4,49 @@
 
 #include "Arduino.h"
 #include <Client.h>
-#include <Base64.h> 
+#include <Base64.h>
 #include <ArduinoJson.h>
 #include <string.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+#include <WiFi.h>
+#include <EEPROM.h>
 
-class HttpUpstreamClient{
+class HttpUpstreamClient
+{
 
-  private:
-  
-  char* _clientId;
-  char* _host;
-  char* _base64;
-  String _deviceID;
-  
-  void base64(char* username, char* password);
+private:
+  char *_clientId;
+  char *_host;
+  char *_deviceCredentials;
+  char *_deviceID;
+  Client *_networkClient;
 
-  //void obtaindeviceID(String msg);
-  
-  public:
+  int storeDeviceCredentialsAndHost(char *host, const char *tenantId, const char *username, const char *password);
+  int storeDeviceID();
+  int loadDeviceCredentialsAndHostFromEEPROM();
+  int requestDeviceCredentialsFromTenant(char *host);
+  int loadDeviceIDFromEEPROM();
+  int registerDeviceWithTenant(char *deviceName);
+  int sendMeasurement(char *body);
 
-  Client* _networkClient;
-  
-  
-  HttpUpstreamClient(Client& networkClient);
+public:
+  HttpUpstreamClient(Client &networkClient);
 
-  //create device with a unique device name  
-  void registerDevice(char* deviceName, char* URL, char* username, char* password);
+  int registerDevice(char *host, char *deviceName);
+  int registerDevice(char *host, char *deviceName, char *supportedOperations[]);
 
-  //send a single measurement to the cloud without knowing the device ID 
-  void sendMeasurement(int value, char* unit, String timestamp,char* measurementType,char* measurementObjectName,char* Name,char* URL);
+  void removeDevice();
+  void removeDevice(bool forceClearEEPROM);
 
-  //send an alarm to the cloud without knowing the device ID 
-  void sendAlarm(char* alarm_Type, char* alarm_Text, char* severity,String timestamp, char* URL);
+  int sendMeasurement(char *type, char *fragment, char *series, int value);
+  int sendMeasurement(char *type, char *fragment, char *series, int value, char *unit);
+  int sendMeasurement(char *type, char *fragment, char *series, float value);
+  int sendMeasurement(char *type, char *fragment, char *series, float value, char *unit);
 
-  //send a event to the cloud without knowing the device ID 
-  void sendEvent(char* event_Type, char* event_Text, String timestamp, char* URL);
-  
-  };
+  void sendAlarm(char *alarm_Type, char *alarm_Text, char *severity);
+
+  void sendEvent(char *event_Type, char *event_Text);
+};
 
 #endif
