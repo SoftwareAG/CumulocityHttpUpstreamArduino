@@ -7,6 +7,8 @@ This library enables you to post the real-time data, alarm and events to the Cum
 
 The University Relation created the library which is used for arduino containing the WiFi module WiFiNINA and WiFi101. 
 
+This branch is used testing of ESP32 and ESP82. Hence, the usability is not stable! Feel free to modify them and test them!
+
 ## Prerequisite
 
 **Libraries to be included**
