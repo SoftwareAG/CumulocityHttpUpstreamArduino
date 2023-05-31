@@ -6,6 +6,8 @@ This library enables you to post the real-time data, alarm and events to the Cum
 
 The University Relation created the library which is used for arduino containing the WiFi module WiFiNINA and WiFi101. 
 
+The library was desgined for  MKR WIFI 1010 only!! If you are the user from ESP32 or ESP82, you have to modify the code. Sorry for that!
+
 # Prerequisite
 
 **Libraries to be included**
